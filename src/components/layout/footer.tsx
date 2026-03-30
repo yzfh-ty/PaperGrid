@@ -41,8 +41,7 @@ export function Footer({
   const icp = getStr('site.footer_icp')
   const mps = parseMpsSetting(getStr('site.footer_mps'))
   const copyright = getStr('site.footer_copyright')
-  const poweredBy = getStr('site.footer_powered_by')
-  const ownerName = getStr('site.ownerName', '千叶')
+  const showPoweredBy = getBool('site.footer_powered_by_enabled', true)
   const description = getStr('site.description', '分享技术文章、生活记录和作品展示的个人博客。')
   const currentYear = getStr('site.currentYear', String(new Date().getUTCFullYear()))
   const githubUrl = getStr('profile.contactGithub', 'https://github.com/xywml/PaperGrid').trim()
@@ -227,8 +226,29 @@ export function Footer({
                 </a>
               </p>
             )}
-            <p>{copyright || `© ${currentYear} ${ownerName}. 保留所有权利.`}</p>
-            {poweredBy && <p className="opacity-80">{poweredBy}</p>}
+            {showPoweredBy ? (
+              <p>
+                <a
+                  href="https://xywml.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                >
+                  © {currentYear} xywml.com
+                </a>
+                <span className="mx-1">·</span>
+                <a
+                  href="https://github.com/xywml/PaperGrid"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                >
+                  Powered by PaperGrid
+                </a>
+              </p>
+            ) : (
+              <p>{copyright || `© ${currentYear} xywml.com`}</p>
+            )}
           </div>
         </div>
       </div>

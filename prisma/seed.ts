@@ -97,6 +97,7 @@ async function main() {
     { key: 'site.footer_icp', value: { value: '蜀ICP备xxxx' }, group: 'site', editable: true },
     { key: 'site.footer_mps', value: { value: '' }, group: 'site', editable: true },
     { key: 'site.footer_copyright', value: { value: '千叶' }, group: 'site', editable: true },
+    { key: 'site.footer_powered_by_enabled', value: { enabled: true }, group: 'site', editable: true },
     { key: 'site.footer_powered_by', value: { value: 'by xywml' }, group: 'site', editable: true },
     // Gotify 通知默认配置
     { key: 'notifications.gotify.enabled', value: { enabled: false }, group: 'notifications', editable: true },

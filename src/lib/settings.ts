@@ -71,7 +71,7 @@ export const PUBLIC_SETTING_KEYS = [
   'site.footer_icp',
   'site.footer_mps',
   'site.footer_copyright',
-  'site.footer_powered_by',
+  'site.footer_powered_by_enabled',
 ] as const
 
 export const POST_PAGE_SETTING_KEYS = [

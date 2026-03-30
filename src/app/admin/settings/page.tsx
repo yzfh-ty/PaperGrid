@@ -747,13 +747,16 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  驱动信息 (Powered By)
+                  驱动信息
                 </label>
-                <Input
-                  className="mt-2"
-                  value={String(getVal('site.footer_powered_by') || '')}
-                  onChange={(e) => setVal('site.footer_powered_by', e.target.value)}
-                />
+                <select
+                  className="mt-2 w-full rounded border bg-transparent px-3 py-2"
+                  value={getBoolVal('site.footer_powered_by_enabled', true) ? 'true' : 'false'}
+                  onChange={(e) => setVal('site.footer_powered_by_enabled', e.target.value === 'true')}
+                >
+                  <option value="true">开启</option>
+                  <option value="false">关闭</option>
+                </select>
               </div>
             </div>
           </CardContent>

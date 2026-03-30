@@ -118,6 +118,13 @@ const AUTO_CREATE_SETTINGS: Record<string, AutoCreateSettingConfig> = {
     secret: false,
     description: '公安备案信息',
   },
+  'site.footer_powered_by_enabled': {
+    value: { enabled: true },
+    group: 'site',
+    editable: true,
+    secret: false,
+    description: '显示页脚驱动信息',
+  },
   'site.customHeadCode': {
     value: { text: '' },
     group: 'site',
