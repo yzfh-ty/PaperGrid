@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -25,6 +26,56 @@ type FooterCategory = {
   slug: string
 }
 
+function CustomFooterContent({ html }: { html: string }) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const normalizedHtml = html.trim()
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || !normalizedHtml) return
+
+    const scripts = Array.from(container.querySelectorAll('script'))
+    for (const script of scripts) {
+      const nextScript = document.createElement('script')
+      for (const attribute of Array.from(script.attributes)) {
+        nextScript.setAttribute(attribute.name, attribute.value)
+      }
+      nextScript.text = script.textContent || ''
+      script.replaceWith(nextScript)
+    }
+  }, [normalizedHtml])
+
+  if (!normalizedHtml) return null
+
+  return (
+    <div
+      ref={containerRef}
+      className="pg-footer-custom-content"
+      dangerouslySetInnerHTML={{ __html: normalizedHtml }}
+    />
+  )
+}
+
+function buildCopyrightLabel({
+  startYear,
+  currentYear,
+  name,
+}: {
+  startYear: string
+  currentYear: string
+  name: string
+}) {
+  const normalizedStartYear = startYear.trim()
+  const normalizedCurrentYear = currentYear.trim()
+  const yearRange =
+    normalizedStartYear && normalizedStartYear !== normalizedCurrentYear
+      ? `${normalizedStartYear}-${normalizedCurrentYear}`
+      : normalizedCurrentYear
+  const owner = name.trim() || 'xywml'
+
+  return `© ${yearRange} ${owner}`
+}
+
 export function Footer({
   settings,
   categories = [],
@@ -40,10 +91,19 @@ export function Footer({
     typeof s[key] === 'boolean' ? (s[key] as boolean) : fallback
   const icp = getStr('site.footer_icp')
   const mps = parseMpsSetting(getStr('site.footer_mps'))
-  const copyright = getStr('site.footer_copyright')
+  const copyrightStartYear = getStr('site.footer_copyright_start_year')
+  const copyrightName = getStr('site.footer_copyright_name', 'xywml')
+  const copyrightUrl = getStr('site.footer_copyright_url', 'https://xywml.com/').trim()
+  const footerCustomHtml = getStr('site.footer_custom_html')
   const showPoweredBy = getBool('site.footer_powered_by_enabled', true)
   const description = getStr('site.description', '分享技术文章、生活记录和作品展示的个人博客。')
   const currentYear = getStr('site.currentYear', String(new Date().getUTCFullYear()))
+  const copyrightLabel = buildCopyrightLabel({
+    startYear: copyrightStartYear,
+    currentYear,
+    name: copyrightName,
+  })
+  const copyrightHref = isValidHref(copyrightUrl) ? copyrightUrl : 'https://xywml.com/'
   const githubUrl = getStr('profile.contactGithub', 'https://github.com/xywml/PaperGrid').trim()
   const xUrl = getStr('profile.contactX').trim()
   const bilibiliUrl = getStr('profile.contactBilibili').trim()
@@ -226,16 +286,20 @@ export function Footer({
                 </a>
               </p>
             )}
-            {showPoweredBy ? (
+            {showPoweredBy && (
               <p>
-                <a
-                  href="https://xywml.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-gray-900 dark:hover:text-white"
-                >
-                  © {currentYear} xywml.com
-                </a>
+                {copyrightHref ? (
+                  <a
+                    href={copyrightHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-gray-900 dark:hover:text-white"
+                  >
+                    {copyrightLabel}
+                  </a>
+                ) : (
+                  <span>{copyrightLabel}</span>
+                )}
                 <span className="mx-1">·</span>
                 <a
                   href="https://github.com/xywml/PaperGrid"
@@ -246,9 +310,8 @@ export function Footer({
                   Powered by PaperGrid
                 </a>
               </p>
-            ) : (
-              <p>{copyright || `© ${currentYear} xywml.com`}</p>
             )}
+            <CustomFooterContent html={footerCustomHtml} />
           </div>
         </div>
       </div>

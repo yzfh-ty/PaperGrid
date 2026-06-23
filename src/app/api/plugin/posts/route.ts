@@ -280,6 +280,7 @@ export async function POST(req: Request) {
       categoryId,
       tags,
       createdAt,
+      publishedAt,
       isProtected,
       password,
     } = body
@@ -335,6 +336,14 @@ export async function POST(req: Request) {
     if (createdAt !== undefined && parsedCreatedAt === undefined) {
       return NextResponse.json(
         { error: '创建时间格式错误' },
+        { status: 400, headers: authResult.headers }
+      )
+    }
+
+    const parsedPublishedAt = parseCreatedAt(publishedAt)
+    if (publishedAt !== undefined && parsedPublishedAt === undefined) {
+      return NextResponse.json(
+        { error: '发布时间格式错误' },
         { status: 400, headers: authResult.headers }
       )
     }
@@ -416,7 +425,7 @@ export async function POST(req: Request) {
         isProtected: protectPost,
         passwordHash: passwordResult.passwordHash,
         ...(parsedCreatedAt ? { createdAt: parsedCreatedAt } : {}),
-        publishedAt: parsedStatus === PostStatus.PUBLISHED ? new Date() : null,
+        publishedAt: parsedStatus === PostStatus.PUBLISHED ? (parsedPublishedAt ?? new Date()) : null,
         postTags: parsedTags.tags.length > 0
           ? {
               create: parsedTags.tags.map((tagId) => ({

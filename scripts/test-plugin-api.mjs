@@ -116,6 +116,10 @@ function buildPostPayload(overrides = {}) {
 const state = {
   createdPostIds: new Set(),
   mainPostId: null,
+  categoryName: null,
+  categoryId: null,
+  tagName: null,
+  tagId: null,
 }
 
 async function runCase(name, fn) {
@@ -176,6 +180,74 @@ async function testListPosts() {
   })
 }
 
+async function testTaxonomies() {
+  logSection('分类与标签 (GET/POST /api/plugin/categories, /api/plugin/tags)')
+
+  await runCase('获取分类列表成功', async () => {
+    const response = await request('GET', '/api/plugin/categories', { apiKey: API_KEY })
+    assert(response.status === 200, `实际状态码: ${response.status}`)
+    assert(Array.isArray(response.data.categories), '返回字段 categories 不是数组')
+    return `分类数量: ${response.data.categories.length}`
+  })
+
+  await runCase('创建或复用分类成功', async () => {
+    const name = `API测试分类-${randomSuffix()}`
+    const response = await request('POST', '/api/plugin/categories', {
+      apiKey: API_KEY,
+      body: { name },
+    })
+    assert(response.status === 201 || response.status === 200, `实际状态码: ${response.status}`)
+    assert(response.data.category?.id, '未返回 category.id')
+    assert(response.data.category?.name === name, `分类名称不匹配: ${response.data.category?.name}`)
+    state.categoryName = name
+    state.categoryId = response.data.category.id
+    return `分类ID: ${state.categoryId}`
+  })
+
+  await runCase('重复创建同名分类会复用已有分类', async () => {
+    assert(state.categoryName, '缺少测试分类名称')
+    const response = await request('POST', '/api/plugin/categories', {
+      apiKey: API_KEY,
+      body: { name: state.categoryName },
+    })
+    assert(response.status === 200, `实际状态码: ${response.status}`)
+    assert(response.data.category?.id === state.categoryId, '未复用已有分类')
+    return `分类ID: ${response.data.category?.id}`
+  })
+
+  await runCase('获取标签列表成功', async () => {
+    const response = await request('GET', '/api/plugin/tags', { apiKey: API_KEY })
+    assert(response.status === 200, `实际状态码: ${response.status}`)
+    assert(Array.isArray(response.data.tags), '返回字段 tags 不是数组')
+    return `标签数量: ${response.data.tags.length}`
+  })
+
+  await runCase('创建或复用标签成功', async () => {
+    const name = `API测试标签-${randomSuffix()}`
+    const response = await request('POST', '/api/plugin/tags', {
+      apiKey: API_KEY,
+      body: { name },
+    })
+    assert(response.status === 201 || response.status === 200, `实际状态码: ${response.status}`)
+    assert(response.data.tag?.id, '未返回 tag.id')
+    assert(response.data.tag?.name === name, `标签名称不匹配: ${response.data.tag?.name}`)
+    state.tagName = name
+    state.tagId = response.data.tag.id
+    return `标签ID: ${state.tagId}`
+  })
+
+  await runCase('重复创建同名标签会复用已有标签', async () => {
+    assert(state.tagName, '缺少测试标签名称')
+    const response = await request('POST', '/api/plugin/tags', {
+      apiKey: API_KEY,
+      body: { name: state.tagName },
+    })
+    assert(response.status === 200, `实际状态码: ${response.status}`)
+    assert(response.data.tag?.id === state.tagId, '未复用已有标签')
+    return `标签ID: ${response.data.tag?.id}`
+  })
+}
+
 async function testCreatePost() {
   logSection('创建文章 (POST /api/plugin/posts)')
 
@@ -221,6 +293,24 @@ async function testCreatePost() {
     state.createdPostIds.add(postId)
     assert(response.data.post?.isProtected === true, 'isProtected 未设置为 true')
     return `文章ID: ${postId}`
+  })
+
+  await runCase('创建时可指定发布时间 publishedAt', async () => {
+    const publishedAt = '2026-02-09T12:30:00.000Z'
+    const payload = buildPostPayload({
+      status: 'PUBLISHED',
+      publishedAt,
+    })
+    const response = await request('POST', '/api/plugin/posts', {
+      apiKey: API_KEY,
+      body: payload,
+    })
+    assert(response.status === 201, `实际状态码: ${response.status}`)
+    const postId = response.data.post?.id
+    assert(postId, '未返回 post.id')
+    state.createdPostIds.add(postId)
+    assert(response.data.post?.publishedAt === publishedAt, `发布时间不匹配: ${response.data.post?.publishedAt}`)
+    return `发布时间: ${response.data.post?.publishedAt}`
   })
 
   await runCase('缺少 title 应返回 400', async () => {
@@ -317,6 +407,38 @@ async function testCreatePost() {
     const response = await request('POST', '/api/plugin/posts', {
       apiKey: API_KEY,
       body: buildPostPayload({ createdAt: 'invalid-date-format' }),
+    })
+    assert(response.status === 400, `实际状态码: ${response.status}`)
+    return `错误信息: ${response.data.error || '无'}`
+  })
+
+  await runCase('使用插件分类与标签 ID 创建文章成功', async () => {
+    assert(state.categoryId, '缺少测试分类 ID')
+    assert(state.tagId, '缺少测试标签 ID')
+    const payload = buildPostPayload({
+      categoryId: state.categoryId,
+      tags: [state.tagId],
+    })
+    const response = await request('POST', '/api/plugin/posts', {
+      apiKey: API_KEY,
+      body: payload,
+    })
+    assert(response.status === 201, `实际状态码: ${response.status}`)
+    const postId = response.data.post?.id
+    assert(postId, '未返回 post.id')
+    state.createdPostIds.add(postId)
+    assert(response.data.post?.category?.id === state.categoryId, '分类未正确关联')
+    const tagIds = Array.isArray(response.data.post?.postTags)
+      ? response.data.post.postTags.map((item) => item.tag?.id)
+      : []
+    assert(tagIds.includes(state.tagId), '标签未正确关联')
+    return `文章ID: ${postId}`
+  })
+
+  await runCase('publishedAt 非法格式应返回 400', async () => {
+    const response = await request('POST', '/api/plugin/posts', {
+      apiKey: API_KEY,
+      body: buildPostPayload({ status: 'PUBLISHED', publishedAt: 'invalid-date-format' }),
     })
     assert(response.status === 400, `实际状态码: ${response.status}`)
     return `错误信息: ${response.data.error || '无'}`
@@ -422,6 +544,20 @@ async function testUpdatePost() {
     assert(response.status === 200, `实际状态码: ${response.status}`)
     assert(response.data.post?.isProtected === false, 'isProtected 未设置为 false')
     return '密码保护已关闭'
+  })
+
+  await runCase('更新发布时间 publishedAt 成功', async () => {
+    const publishedAt = '2026-02-10T08:15:00.000Z'
+    const response = await request('PATCH', `/api/plugin/posts/${state.mainPostId}`, {
+      apiKey: API_KEY,
+      body: {
+        status: 'PUBLISHED',
+        publishedAt,
+      },
+    })
+    assert(response.status === 200, `实际状态码: ${response.status}`)
+    assert(response.data.post?.publishedAt === publishedAt, `发布时间不匹配: ${response.data.post?.publishedAt}`)
+    return `发布时间: ${response.data.post?.publishedAt}`
   })
 
   await runCase('categoryId 类型错误应返回 400', async () => {
@@ -546,6 +682,7 @@ async function main() {
   try {
     await testAuthentication()
     await testListPosts()
+    await testTaxonomies()
     await testCreatePost()
     await testGetPost()
     await testUpdatePost()

@@ -96,8 +96,11 @@ async function main() {
     // 页脚设置
     { key: 'site.footer_icp', value: { value: '蜀ICP备xxxx' }, group: 'site', editable: true },
     { key: 'site.footer_mps', value: { value: '' }, group: 'site', editable: true },
-    { key: 'site.footer_copyright', value: { value: '千叶' }, group: 'site', editable: true },
+    { key: 'site.footer_copyright_start_year', value: { value: '' }, group: 'site', editable: true },
+    { key: 'site.footer_copyright_name', value: { value: 'xywml' }, group: 'site', editable: true },
+    { key: 'site.footer_copyright_url', value: { value: 'https://xywml.com/' }, group: 'site', editable: true },
     { key: 'site.footer_powered_by_enabled', value: { enabled: true }, group: 'site', editable: true },
+    { key: 'site.footer_custom_html', value: { text: '' }, group: 'site', editable: true },
     { key: 'site.footer_powered_by', value: { value: 'by xywml' }, group: 'site', editable: true },
     // Gotify 通知默认配置
     { key: 'notifications.gotify.enabled', value: { enabled: false }, group: 'notifications', editable: true },

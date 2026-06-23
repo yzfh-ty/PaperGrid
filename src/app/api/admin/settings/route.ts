@@ -118,12 +118,40 @@ const AUTO_CREATE_SETTINGS: Record<string, AutoCreateSettingConfig> = {
     secret: false,
     description: '公安备案信息',
   },
+  'site.footer_copyright_start_year': {
+    value: { value: '' },
+    group: 'site',
+    editable: true,
+    secret: false,
+    description: '页脚版权起始年份',
+  },
+  'site.footer_copyright_name': {
+    value: { value: 'xywml' },
+    group: 'site',
+    editable: true,
+    secret: false,
+    description: '页脚版权名称',
+  },
+  'site.footer_copyright_url': {
+    value: { value: 'https://xywml.com/' },
+    group: 'site',
+    editable: true,
+    secret: false,
+    description: '页脚版权链接',
+  },
   'site.footer_powered_by_enabled': {
     value: { enabled: true },
     group: 'site',
     editable: true,
     secret: false,
     description: '显示页脚驱动信息',
+  },
+  'site.footer_custom_html': {
+    value: { text: '' },
+    group: 'site',
+    editable: true,
+    secret: false,
+    description: '页脚自定义内容',
   },
   'site.customHeadCode': {
     value: { text: '' },
@@ -161,6 +189,11 @@ function normalizeSettingUpdateValue(key: string, value: Prisma.InputJsonValue):
   if (key === 'ui.mobileReadingBackground') {
     const rawStyle = readStringValue(['style', 'value', 'text'])
     return { style: normalizeMobileReadingBackground(rawStyle) }
+  }
+
+  if (key === 'site.footer_custom_html') {
+    const rawText = readStringValue(['text', 'value'])
+    return { text: typeof rawText === 'string' ? rawText.slice(0, 20000) : '' }
   }
 
   if (key === 'site.customHeadCode') {

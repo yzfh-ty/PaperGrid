@@ -33,6 +33,7 @@ type PostRecord = {
   excerpt: string | null
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   createdAt: string | Date
+  publishedAt: string | Date | null
   updatedAt: string | Date
   author: { name: string | null; email: string | null }
   category: { name: string } | null
@@ -403,6 +404,7 @@ export function AdminPostsClient({
                       <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                         <span>分类：{post.category?.name || '-'}</span>
                         <span>评论：{post._count.comments}</span>
+                        <span>发布：{post.publishedAt ? formatDateLabel(post.publishedAt) : '-'}</span>
                         <span>更新：{formatDateLabel(post.updatedAt)}</span>
                       </div>
                       <div className="mt-3 flex items-center gap-2">
@@ -451,6 +453,7 @@ export function AdminPostsClient({
                         <th className="px-6 py-3 font-medium">作者</th>
                         <th className="px-6 py-3 font-medium">评论</th>
                         <th className="px-6 py-3 font-medium">创建时间</th>
+                        <th className="px-6 py-3 font-medium">发布时间</th>
                         <th className="px-6 py-3 font-medium">最后编辑</th>
                         <th className="px-6 py-3 font-medium">操作</th>
                       </tr>
@@ -501,6 +504,9 @@ export function AdminPostsClient({
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                             {formatDateLabel(post.createdAt)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                            {post.publishedAt ? formatDateLabel(post.publishedAt) : '-'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                             {formatDateLabel(post.updatedAt)}

@@ -737,13 +737,39 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  版权信息
+                  版权起始年份
                 </label>
                 <Input
                   className="mt-2"
-                  value={String(getVal('site.footer_copyright') || '')}
-                  onChange={(e) => setVal('site.footer_copyright', e.target.value)}
+                  value={String(getVal('site.footer_copyright_start_year') || '')}
+                  onChange={(e) => setVal('site.footer_copyright_start_year', e.target.value)}
+                  placeholder="留空则使用当前年份"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  版权名称
+                </label>
+                <Input
+                  className="mt-2"
+                  value={String(getVal('site.footer_copyright_name') || '')}
+                  onChange={(e) => setVal('site.footer_copyright_name', e.target.value)}
+                  placeholder="xywml"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  版权链接
+                </label>
+                <Input
+                  className="mt-2"
+                  value={String(getVal('site.footer_copyright_url') || '')}
+                  onChange={(e) => setVal('site.footer_copyright_url', e.target.value)}
+                  placeholder="留空则使用 https://xywml.com/"
+                />
+                <p className="text-muted-foreground mt-1 text-xs">
+                  填写后版权信息跳转到该链接；留空则使用默认链接。
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -757,6 +783,20 @@ export default function AdminSettingsPage() {
                   <option value="true">开启</option>
                   <option value="false">关闭</option>
                 </select>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  页脚自定义内容
+                </label>
+                <Textarea
+                  className="mt-2 min-h-48 font-mono text-xs"
+                  value={String(getVal('site.footer_custom_html') || '')}
+                  onChange={(e) => setVal('site.footer_custom_html', e.target.value)}
+                  placeholder="支持 HTML、CSS 和 JS，例如运行时间、徽章、统计信息等。"
+                />
+                <p className="text-muted-foreground mt-1 text-xs">
+                  内容会显示在页脚底部，仅建议粘贴可信代码。
+                </p>
               </div>
             </div>
           </CardContent>

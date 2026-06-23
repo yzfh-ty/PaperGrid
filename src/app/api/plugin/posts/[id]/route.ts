@@ -242,6 +242,7 @@ export async function PATCH(
       categoryId,
       tags,
       createdAt,
+      publishedAt,
       isProtected,
       password,
     } = body
@@ -296,6 +297,14 @@ export async function PATCH(
     if (createdAt !== undefined && parsedCreatedAt === undefined) {
       return NextResponse.json(
         { error: '创建时间格式错误' },
+        { status: 400, headers: authResult.headers }
+      )
+    }
+
+    const parsedPublishedAt = parseCreatedAt(publishedAt)
+    if (publishedAt !== undefined && parsedPublishedAt === undefined) {
+      return NextResponse.json(
+        { error: '发布时间格式错误' },
         { status: 400, headers: authResult.headers }
       )
     }
@@ -392,10 +401,11 @@ export async function PATCH(
         ...(parsedStatus !== undefined && {
           status: parsedStatus,
           publishedAt:
-            parsedStatus === PostStatus.PUBLISHED && !existingPost.publishedAt
-              ? new Date()
+            parsedStatus === PostStatus.PUBLISHED
+              ? (parsedPublishedAt ?? existingPost.publishedAt ?? new Date())
               : existingPost.publishedAt,
         }),
+        ...(parsedStatus === undefined && parsedPublishedAt !== undefined && { publishedAt: parsedPublishedAt }),
         ...(parsedLocale !== undefined && { locale: parsedLocale }),
         ...(parsedCreatedAt ? { createdAt: parsedCreatedAt } : {}),
         ...(categoryValidation.resolvedCategoryId !== undefined && {

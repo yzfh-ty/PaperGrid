@@ -12,6 +12,7 @@ const postListSelect = {
   excerpt: true,
   status: true,
   createdAt: true,
+  publishedAt: true,
   updatedAt: true,
   author: {
     select: {

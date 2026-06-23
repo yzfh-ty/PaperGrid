@@ -5,6 +5,7 @@ const SETTING_VALUE_FIELD_BY_KEY: Record<string, string> = {
   'ui.publicStylePreset': 'preset',
   'ui.mobileReadingBackground': 'style',
   'site.customHeadCode': 'text',
+  'site.footer_custom_html': 'text',
 }
 
 const COMMON_SETTING_FIELDS = ['value', 'text', 'enabled', 'style', 'preset'] as const
@@ -70,8 +71,11 @@ export const PUBLIC_SETTING_KEYS = [
   'profile.social.qq.enabled',
   'site.footer_icp',
   'site.footer_mps',
-  'site.footer_copyright',
+  'site.footer_copyright_start_year',
+  'site.footer_copyright_name',
+  'site.footer_copyright_url',
   'site.footer_powered_by_enabled',
+  'site.footer_custom_html',
 ] as const
 
 export const POST_PAGE_SETTING_KEYS = [
